@@ -1,13 +1,17 @@
 import { useState } from 'react';
+import { saveDataToSheet } from '../googleSheets'; // Import Google Sheets function
 
 export default function StockForm() {
   const [formData, setFormData] = useState({
     user: "",
     location: "",
     stock: [
-      { item: "Item A", empty: "", full: "" },
-      { item: "Item B", empty: "", full: "" },
-      { item: "Item C", empty: "", full: "" }
+      { item: "9kg", empty: "", full: "" },
+      { item: "14kg", empty: "", full: "" },
+      { item: "19kg", empty: "", full: "" },
+      { item: "48kg", empty: "", full: "" },
+      { item: "Non Commercial", empty: "", full: "" },
+      { item: "Other", empty: "", full: "" }
     ]
   });
 
@@ -17,10 +21,16 @@ export default function StockForm() {
     setFormData({ ...formData, stock: newStock });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Submitted Data:", formData);
+    
+    // Save data to Google Sheets
+    await saveDataToSheet(formData);
   };
+
+  // Check if all required fields are filled
+  const isFormValid = formData.user && formData.location && formData.stock.every(item => item.empty && item.full);
 
   return (
     <div className="p-6 max-w-lg mx-auto bg-white rounded-xl shadow-md space-y-4 border border-gray-300">
@@ -34,8 +44,9 @@ export default function StockForm() {
             onChange={(e) => setFormData({ ...formData, user: e.target.value })}
           >
             <option value="">Select User</option>
-            <option value="User1">User 1</option>
-            <option value="User2">User 2</option>
+            <option value="Driver">User 1</option>
+            <option value="Admin">User 2</option>
+            <option value="Operations">User 3</option>
           </select>
         </div>
 
@@ -85,7 +96,11 @@ export default function StockForm() {
           </tbody>
         </table>
 
-        <button className="mt-4 w-full bg-blue-500 text-white p-2 rounded" type="submit">
+        <button 
+          className={`mt-4 w-full p-2 rounded ${isFormValid ? 'bg-green-500' : 'bg-gray-300'}`} 
+          type="submit" 
+          disabled={!isFormValid}
+        >
           Submit
         </button>
       </form>
